@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pryMaciaGodoy_Iefi", "pryMaciaGodoy_Iefi\pryMaciaGodoy_Iefi.csproj", "{3563AD85-0442-4917-A0C6-3503B6CFEEF0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3563AD85-0442-4917-A0C6-3503B6CFEEF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3563AD85-0442-4917-A0C6-3503B6CFEEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3563AD85-0442-4917-A0C6-3503B6CFEEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3563AD85-0442-4917-A0C6-3503B6CFEEF0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {18048A51-8790-45FD-B235-55D7292CF62B}
+	EndGlobalSection
+EndGlobal
