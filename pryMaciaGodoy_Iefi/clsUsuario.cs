@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace pryMaciaGodoy_Iefi
 {
-    internal class clsUsuario
+    public class clsUsuario
     {
         public int Id { get; set; }
         public string Nombre { get; set; }

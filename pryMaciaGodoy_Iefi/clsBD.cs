@@ -58,7 +58,8 @@ namespace pryMaciaGodoy_Iefi
                     cmd.Parameters.Add("@Nombre", SqlDbType.NVarChar).Value = usuario.Nombre;
                     cmd.Parameters.Add("@Contraseña", SqlDbType.NVarChar).Value = usuario.Contraseña;
                     cmd.Parameters.Add("@Correo", SqlDbType.NVarChar).Value = usuario.Correo;
-                    cmd.Parameters.Add("@Rol", SqlDbType.Int).Value = 2;
+                    cmd.Parameters.Add("@Rol", SqlDbType.Int).Value = usuario.RolId;
+
 
                     cmd.ExecuteNonQuery();
                     MessageBox.Show("Usuario registrado exitosamente.", "Éxito");
@@ -73,9 +74,9 @@ namespace pryMaciaGodoy_Iefi
         public void ActualizarUsuario(clsUsuario usuario)
         {
             const string sql = @"
-                UPDATE Usuarios 
-                SET Nombre = @Nombre, Contraseña = @Contraseña, Correo = @Correo 
-                WHERE Id = @Id";
+        UPDATE Usuarios 
+        SET Nombre = @Nombre, Contraseña = @Contraseña, Correo = @Correo, RolId = @RolId 
+        WHERE Id = @Id";
 
             try
             {
@@ -85,6 +86,7 @@ namespace pryMaciaGodoy_Iefi
                     cmd.Parameters.Add("@Nombre", SqlDbType.NVarChar).Value = usuario.Nombre;
                     cmd.Parameters.Add("@Contraseña", SqlDbType.NVarChar).Value = usuario.Contraseña;
                     cmd.Parameters.Add("@Correo", SqlDbType.NVarChar).Value = usuario.Correo;
+                    cmd.Parameters.Add("@RolId", SqlDbType.Int).Value = usuario.RolId;
                     cmd.Parameters.Add("@Id", SqlDbType.Int).Value = usuario.Id;
 
                     cmd.ExecuteNonQuery();
@@ -261,9 +263,9 @@ namespace pryMaciaGodoy_Iefi
         {
             const string sql = @"
         INSERT INTO Tareas 
-        (IdUsuario, IdTipoTarea, Fecha, IdLugar, Comentario, Uniforme, Insumo, Licencia, Estudio, Vacacion, ReclamoSalario, ReclamoRecibo)
+        (IdUsuario, IdTipoTarea, Fecha, IdLugar, Comentario, Insumo, Estudio, Vacacion, ReclamoSalario, ReclamoRecibo)
         VALUES 
-        (@usuario, @tipo, @fecha, @lugar, @comentario, @uniforme, @insumo, @licencia, @estudio, @vacacion, @salario, @recibo)";
+        (@usuario, @tipo, @fecha, @lugar, @comentario,@insumo, @estudio, @vacacion, @salario, @recibo)";
 
             using (SqlConnection cn = new SqlConnection(cadenaConexion))
             using (SqlCommand cmd = new SqlCommand(sql, cn))
@@ -273,9 +275,9 @@ namespace pryMaciaGodoy_Iefi
                 cmd.Parameters.AddWithValue("@fecha", tarea.Fecha);
                 cmd.Parameters.AddWithValue("@lugar", (object)tarea.IdLugar ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@comentario", tarea.Comentario ?? "");
-                cmd.Parameters.AddWithValue("@uniforme", tarea.Uniforme);
+          
                 cmd.Parameters.AddWithValue("@insumo", tarea.Insumo);
-                cmd.Parameters.AddWithValue("@licencia", tarea.Licencia);
+ 
                 cmd.Parameters.AddWithValue("@estudio", tarea.Estudio);
                 cmd.Parameters.AddWithValue("@vacacion", tarea.Vacacion);
                 cmd.Parameters.AddWithValue("@salario", tarea.ReclamoSalario);
@@ -283,9 +285,103 @@ namespace pryMaciaGodoy_Iefi
 
                 cn.Open();
                 cmd.ExecuteNonQuery();
+                try
+                {
+                    cn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al guardar la tarea: " + ex.Message);
+                }
+            }
+        }
+        public void CargarTiposTarea(ComboBox combo)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                cn.Open();
+                string query = "SELECT Id, Nombre FROM TiposTarea";
+                SqlDataAdapter da = new SqlDataAdapter(query, cn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                combo.DataSource = dt;
+                combo.DisplayMember = "Nombre";
+                combo.ValueMember = "Id";
+                combo.SelectedIndex = -1;
             }
         }
 
+        public void CargarLugares(ComboBox combo)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                cn.Open();
+                string query = "SELECT Id, Nombre FROM Lugares";
+                SqlDataAdapter da = new SqlDataAdapter(query, cn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                combo.DataSource = dt;
+                combo.DisplayMember = "Nombre";
+                combo.ValueMember = "Id";
+                combo.SelectedIndex = -1;
+            }
+        }
+        public void Agregar_TipoTarea(clsTarea tarea)
+        {
+            using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+            {
+                string consulta = "INSERT INTO TiposTarea (Nombre) VALUES (@Nombre)";
+                SqlCommand cmd = new SqlCommand(consulta, conexion);
+                cmd.Parameters.AddWithValue("@Nombre", tarea.Comentario); 
+
+                conexion.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+        public void Agregar_Lugar(string nombreLugar)
+        {
+            using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+            {
+                string consulta = "INSERT INTO Lugares (Nombre) VALUES (@Nombre)";
+                SqlCommand cmd = new SqlCommand(consulta, conexion);
+                cmd.Parameters.AddWithValue("@Nombre", nombreLugar);
+
+                conexion.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void ListarTareas(DataGridView grilla)
+        {
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                {
+                    conexion.Open();
+
+                    string query = "SELECT t.Id, t.Fecha, tt.Nombre AS TipoTarea, l.Nombre AS Lugar, " +
+                                   "t.Insumo, t.Estudio, t.Vacacion, t.ReclamoSalario, t.ReclamoRecibo, t.Comentario " +
+                                   "FROM Tareas t " +
+                                   "INNER JOIN TiposTarea tt ON t.IdTipoTarea = tt.Id " +
+                                   "LEFT JOIN Lugares l ON t.IdLugar = l.Id " +  // Usamos LEFT JOIN porque el lugar puede ser null
+                                   "ORDER BY t.Fecha DESC;";
+
+                    SqlCommand comando = new SqlCommand(query, conexion);
+                    SqlDataAdapter adaptador = new SqlDataAdapter(comando);
+
+                    DataTable tabla = new DataTable();
+                    adaptador.Fill(tabla);
+                    grilla.DataSource = tabla;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al listar las tareas: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
     }
 }

@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MaterialSkin;
-using MaterialSkin.Controls;
+
 
 namespace pryMaciaGodoy_Iefi
 {
@@ -22,7 +22,14 @@ namespace pryMaciaGodoy_Iefi
 
         private void frmListarTareas_Load(object sender, EventArgs e)
         {
+            clsBD conexion = new clsBD();
+            conexion.ListarTareas(dgvTareas);
 
+            dgvTareas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgvTareas.ReadOnly = true;
+            dgvTareas.AllowUserToAddRows = false;
+            dgvTareas.AllowUserToDeleteRows = false;
+            dgvTareas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         }
     }
 }

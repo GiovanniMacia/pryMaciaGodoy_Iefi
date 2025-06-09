@@ -78,12 +78,6 @@
     <Compile Include="frmPrincipal.Designer.cs">
       <DependentUpon>frmPrincipal.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmReclamoTarea.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmReclamoTarea.Designer.cs">
-      <DependentUpon>frmReclamoTarea.cs</DependentUpon>
-    </Compile>
     <Compile Include="frmRegistrarTarea.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -109,9 +103,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmPrincipal.resx">
       <DependentUpon>frmPrincipal.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmReclamoTarea.resx">
-      <DependentUpon>frmReclamoTarea.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmRegistrarTarea.resx">
       <DependentUpon>frmRegistrarTarea.cs</DependentUpon>

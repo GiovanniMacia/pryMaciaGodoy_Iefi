@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmPrincipal : MaterialForm
     {
-        private  string usuarioNombre;
+        private string nombreUsuario;
         private int usuarioRol;
 
         private DateTime fechaInicioSesion;
@@ -26,11 +27,11 @@ namespace pryMaciaGodoy_Iefi
         public frmPrincipal(String nombre, int rol)
         {
             InitializeComponent();
-            usuarioNombre = nombre;
+            nombreUsuario = nombre;
             usuarioRol = rol;
         }
 
-        private void frmPrincipal_Load(object sender, EventArgs e)
+        public void frmPrincipal_Load(object sender, EventArgs e)
         {
             // Iniciar tiempo
             Tiempo.Interval = 1000;
@@ -39,7 +40,7 @@ namespace pryMaciaGodoy_Iefi
             horaInicioSesion = DateTime.Now;
             fechaInicioSesion = horaInicioSesion.Date;
 
-            lblUsuarioActivo.Text = $"Bienvenido: {usuarioNombre}";
+            lblUsuarioActivo.Text = $"Bienvenido: {nombreUsuario}";
             lblFechaa.Text = $"Fecha: {fechaInicioSesion:dd/MM/yyyy}";
 
             ConfigurarAccesoPorRol();
@@ -73,7 +74,26 @@ namespace pryMaciaGodoy_Iefi
 
             if (confirmar == DialogResult.Yes)
             {
+                // Detener cualquier temporizador si aplica
                 Tiempo.Stop();
+
+                // Obtener hora fin
+                DateTime horaFinSesion = DateTime.Now;
+
+                // Armar el objeto sesión
+                int idUsuario = conexion.ObtenerIdUsuarioPorNombre(nombreUsuario); // Método que ya tenés
+                clsSesion sesion = new clsSesion
+                {
+                    IdUsuario = idUsuario,
+                    FechaInicio = horaInicioSesion.Date,
+                    HoraInicio = horaInicioSesion,
+                    HoraFin = horaFinSesion
+                };
+
+                // Guardar la sesión
+                conexion.GuardarSesion(sesion);
+
+                // Volver al login
                 this.Hide();
                 new frmLogin().Show();
             }
@@ -93,7 +113,7 @@ namespace pryMaciaGodoy_Iefi
             horaFinSesion = DateTime.Now;
             TimeSpan duracion = horaFinSesion - horaInicioSesion;
 
-            int idUsuario = conexion.ObtenerIdUsuarioPorNombre(usuarioNombre);
+            int idUsuario = conexion.ObtenerIdUsuarioPorNombre(nombreUsuario);
             clsSesion nuevaSesion = new clsSesion(0, idUsuario, fechaInicioSesion, horaInicioSesion, horaFinSesion, duracion);
 
             conexion.GuardarSesion(nuevaSesion);
@@ -112,11 +132,35 @@ namespace pryMaciaGodoy_Iefi
             auditoria.ShowDialog();
         }
 
-        private void registrarTareasToolStripMenuItem_Click(object sender, EventArgs e)
+        public void registrarTareasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmRegistrarTarea frm = new frmRegistrarTarea();
-            frm.ShowDialog();
+            frmRegistrarTarea frm = new frmRegistrarTarea(usuarioRol);
 
+            frm.Show();
+
+        }
+
+        private void frmPrincipal_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            clsBD conexion = new clsBD();
+
+            int idUsuario = conexion.ObtenerIdUsuarioPorNombre(frmLogin.UsuarioActual);
+
+            clsSesion sesion = new clsSesion
+            {
+                IdUsuario = idUsuario,
+                FechaInicio = frmLogin.HoraInicioSesion.Date,
+                HoraInicio = frmLogin.HoraInicioSesion,
+                HoraFin = DateTime.Now
+            };
+
+            conexion.GuardarSesion(sesion);
+        }
+
+        private void listarTareasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmListarTareas listar = new frmListarTareas();
+            listar.ShowDialog();
         }
     }
 }

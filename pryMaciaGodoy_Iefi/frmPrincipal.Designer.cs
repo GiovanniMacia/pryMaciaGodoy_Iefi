@@ -29,8 +29,11 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmPrincipal));
             this.menuInicio = new System.Windows.Forms.MenuStrip();
             this.menuTareas = new System.Windows.Forms.ToolStripMenuItem();
+            this.registrarTareasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listarTareasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAdministracion = new System.Windows.Forms.ToolStripMenuItem();
             this.usuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.auditoriaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,11 +44,10 @@
             this.LblTiempo = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblFechaa = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblFechaInicio = new System.Windows.Forms.ToolStripStatusLabel();
-            this.registrarTareasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.reclamarTareasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.listarTareasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.menuInicio.SuspendLayout();
             this.statusBarInicio.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // menuInicio
@@ -65,11 +67,24 @@
             // 
             this.menuTareas.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.registrarTareasToolStripMenuItem,
-            this.reclamarTareasToolStripMenuItem,
             this.listarTareasToolStripMenuItem});
             this.menuTareas.Name = "menuTareas";
             this.menuTareas.Size = new System.Drawing.Size(64, 24);
             this.menuTareas.Text = "Tareas";
+            // 
+            // registrarTareasToolStripMenuItem
+            // 
+            this.registrarTareasToolStripMenuItem.Name = "registrarTareasToolStripMenuItem";
+            this.registrarTareasToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.registrarTareasToolStripMenuItem.Text = "Registrar Tareas";
+            this.registrarTareasToolStripMenuItem.Click += new System.EventHandler(this.registrarTareasToolStripMenuItem_Click);
+            // 
+            // listarTareasToolStripMenuItem
+            // 
+            this.listarTareasToolStripMenuItem.Name = "listarTareasToolStripMenuItem";
+            this.listarTareasToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.listarTareasToolStripMenuItem.Text = "Listar Tareas";
+            this.listarTareasToolStripMenuItem.Click += new System.EventHandler(this.listarTareasToolStripMenuItem_Click);
             // 
             // menuAdministracion
             // 
@@ -83,14 +98,14 @@
             // usuariosToolStripMenuItem
             // 
             this.usuariosToolStripMenuItem.Name = "usuariosToolStripMenuItem";
-            this.usuariosToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.usuariosToolStripMenuItem.Size = new System.Drawing.Size(154, 26);
             this.usuariosToolStripMenuItem.Text = "Usuarios";
             this.usuariosToolStripMenuItem.Click += new System.EventHandler(this.usuariosToolStripMenuItem_Click);
             // 
             // auditoriaToolStripMenuItem
             // 
             this.auditoriaToolStripMenuItem.Name = "auditoriaToolStripMenuItem";
-            this.auditoriaToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.auditoriaToolStripMenuItem.Size = new System.Drawing.Size(154, 26);
             this.auditoriaToolStripMenuItem.Text = "Auditoria";
             this.auditoriaToolStripMenuItem.Click += new System.EventHandler(this.auditoriaToolStripMenuItem_Click);
             // 
@@ -145,41 +160,36 @@
             this.lblFechaInicio.Size = new System.Drawing.Size(47, 20);
             this.lblFechaInicio.Text = "Fecha";
             // 
-            // registrarTareasToolStripMenuItem
+            // pictureBox3
             // 
-            this.registrarTareasToolStripMenuItem.Name = "registrarTareasToolStripMenuItem";
-            this.registrarTareasToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.registrarTareasToolStripMenuItem.Text = "Registrar Tareas";
-            this.registrarTareasToolStripMenuItem.Click += new System.EventHandler(this.registrarTareasToolStripMenuItem_Click);
-            // 
-            // reclamarTareasToolStripMenuItem
-            // 
-            this.reclamarTareasToolStripMenuItem.Name = "reclamarTareasToolStripMenuItem";
-            this.reclamarTareasToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.reclamarTareasToolStripMenuItem.Text = "Reclamar Tareas";
-            // 
-            // listarTareasToolStripMenuItem
-            // 
-            this.listarTareasToolStripMenuItem.Name = "listarTareasToolStripMenuItem";
-            this.listarTareasToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.listarTareasToolStripMenuItem.Text = "Listar Tareas";
+            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
+            this.pictureBox3.Location = new System.Drawing.Point(6, 29);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(30, 32);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox3.TabIndex = 34;
+            this.pictureBox3.TabStop = false;
             // 
             // frmPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(940, 536);
+            this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.statusBarInicio);
             this.Controls.Add(this.menuInicio);
             this.MainMenuStrip = this.menuInicio;
             this.Name = "frmPrincipal";
-            this.Text = "Menu Principal";
+            this.Text = "     Menu Principal";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmPrincipal_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmPrincipal_FormClosed);
             this.Load += new System.EventHandler(this.frmPrincipal_Load);
             this.menuInicio.ResumeLayout(false);
             this.menuInicio.PerformLayout();
             this.statusBarInicio.ResumeLayout(false);
             this.statusBarInicio.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -199,7 +209,7 @@
         private System.Windows.Forms.ToolStripStatusLabel lblFechaa;
         private System.Windows.Forms.ToolStripStatusLabel lblFechaInicio;
         private System.Windows.Forms.ToolStripMenuItem registrarTareasToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reclamarTareasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listarTareasToolStripMenuItem;
+        private System.Windows.Forms.PictureBox pictureBox3;
     }
 }

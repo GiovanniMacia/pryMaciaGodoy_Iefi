@@ -133,9 +133,19 @@ namespace pryMaciaGodoy_Iefi
 
             txtUsuario.Text = fila.Cells["Nombre"].Value.ToString();
             txtCorreo.Text = fila.Cells["Correo"].Value.ToString();
-            cmbRol.SelectedValue = fila.Cells["Rol"].Value.ToString() == "Administrador" ? 1 : 2;
+            string nombreRol = fila.Cells["Rol"].Value.ToString();
 
-           
+            foreach (DataRowView item in cmbRol.Items)
+            {
+                if (item["Nombre"].ToString() == nombreRol)
+                {
+                    cmbRol.SelectedValue = item["Id"];
+                    break;
+                }
+            }
+
+
+
         }
         private bool ValidarCampos()
         {
@@ -175,6 +185,18 @@ namespace pryMaciaGodoy_Iefi
             txtContraseña.Clear();
             cmbRol.SelectedIndex = -1;
             usuarioSeleccionado = null;
+        }
+
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnVolver_Click(object sender, EventArgs e)
+        {
+            
+            this.Close();
+
         }
     }
 }

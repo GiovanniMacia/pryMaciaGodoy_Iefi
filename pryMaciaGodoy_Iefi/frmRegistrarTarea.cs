@@ -15,17 +15,23 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmRegistrarTarea : MaterialForm
     {
+        private BindingList<clsTarea> listaTareas = new BindingList<clsTarea>();
+
         private string cadenaConexion = "Server=localhost\\SQLEXPRESS;Database=LabIefi;Trusted_Connection=True;";
-        private int idUsuario;
-        public frmRegistrarTarea()
+        private int usuarioId;
+        clsBD conexion = new clsBD();
+        public frmRegistrarTarea(int usuarioId)
         {
             InitializeComponent();
+            this.usuarioId = usuarioId;
         }
 
-        private void frmRegistrarTarea_Load(object sender, EventArgs e)
+        public void frmRegistrarTarea_Load(object sender, EventArgs e)
         {
-            CargarTiposTarea();
-            CargarLugares();
+
+            InicializarGrilla();
+            conexion.CargarTiposTarea(cmbTipoTarea);
+            conexion.CargarLugares(cmbLugaress);
         }
         private void CargarTiposTarea()
         {
@@ -37,10 +43,10 @@ namespace pryMaciaGodoy_Iefi
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                cmbTiposTarea.DataSource = dt;
-                cmbTiposTarea.DisplayMember = "Nombre";
-                cmbTiposTarea.ValueMember = "Id";
-                cmbTiposTarea.SelectedIndex = -1;
+                cmbTipoTarea.DataSource = dt;
+                cmbTipoTarea.DisplayMember = "Nombre";
+                cmbTipoTarea.ValueMember = "Id";
+                cmbTipoTarea.SelectedIndex = -1;
             }
         }
 
@@ -54,10 +60,10 @@ namespace pryMaciaGodoy_Iefi
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                cmbLugares.DataSource = dt;
-                cmbLugares.DisplayMember = "Nombre";
-                cmbLugares.ValueMember = "Id";
-                cmbLugares.SelectedIndex = -1;
+                cmbLugaress.DataSource = dt;
+                cmbLugaress.DisplayMember = "Nombre";
+                cmbLugaress.ValueMember = "Id";
+                cmbLugaress.SelectedIndex = -1;
             }
         }
 
@@ -75,32 +81,211 @@ namespace pryMaciaGodoy_Iefi
         {
             return new clsTarea
             {
-                IdUsuario = idUsuario, // obtenelo desde login o formulario
-                IdTipoTarea = Convert.ToInt32(cmbTiposTarea.SelectedValue),
+                IdUsuario = usuarioId, 
+                IdTipoTarea = Convert.ToInt32(cmbTipoTarea.SelectedValue),
                 Fecha = dateTimePicker1.Value.Date,
-                IdLugar = cmbLugares.SelectedIndex != -1 ? (int?)cmbLugares.SelectedValue : null,
-                Comentario = "", // podés agregar un txtComentario si querés
-                Uniforme = chkUniforme.Checked,
-                Insumo = chkInsumo.Checked,
-                Licencia = chkLicencia.Checked,
+                IdLugar = cmbLugaress.SelectedIndex != -1 ? (int?)cmbLugaress.SelectedValue : null,
+                Comentario = "", 
+              
+                Insumo = chkInsumos.Checked,
+              
                 Estudio = chkEstudio.Checked,
                 Vacacion = chkVacacion.Checked,
-                ReclamoSalario = false, // si no estás usando el formulario de reclamo acá
+                
+                ReclamoSalario = false, 
                 ReclamoRecibo = false
             };
         }
         private void LimpiarFormulario()
         {
-            cmbTiposTarea.SelectedIndex = -1;
-            cmbLugares.SelectedIndex = -1;
+            cmbTipoTarea.SelectedIndex = -1;
+            cmbLugaress.SelectedIndex = -1;
             dateTimePicker1.Value = DateTime.Today;
 
-            chkUniforme.Checked = false;
-            chkInsumo.Checked = false;
-            chkLicencia.Checked = false;
+           
+            chkInsumos.Checked = false;
+           
             chkEstudio.Checked = false;
             chkVacacion.Checked = false;
         }
 
+        private void btnGuardar_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnAgregar_Click(object sender, EventArgs e)
+        {
+            if (cmbLugaress.SelectedIndex == -1 || cmbTipoTarea.SelectedIndex == -1)
+            {
+                MessageBox.Show("Debe seleccionar un lugar y un tipo de tarea.");
+                return;
+            }
+            clsTarea nueva = new clsTarea
+            {
+                IdTipoTarea = Convert.ToInt32(cmbTipoTarea.SelectedValue),
+                NombreTipoTarea = cmbTipoTarea.Text, // << NUEVO
+
+                IdLugar = cmbLugaress.SelectedIndex != -1 ? (int?)cmbLugaress.SelectedValue : null,
+                NombreLugar = cmbLugaress.Text, // << NUEVO
+
+                Fecha = dateTimePicker1.Value,
+                Comentario = txtMensajeria.Text.Trim(),
+                Insumo = chkInsumos.Checked,
+                Vacacion = chkVacacion.Checked,
+                Estudio = chkEstudio.Checked,
+                ReclamoSalario = chkSalario.Checked,
+                ReclamoRecibo = chkRecibo.Checked
+            };
+
+            listaTareas.Add(nueva); // <<--- ¡Este es el cambio!
+
+            // Mostrar mensaje
+            MessageBox.Show("Tarea agregada a la lista correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // Limpiar controles
+            cmbLugaress.SelectedIndex = -1;
+            cmbTipoTarea.SelectedIndex = -1;
+            txtMensajeria.Clear();
+            chkInsumos.Checked = false;
+            chkVacacion.Checked = false;
+            chkEstudio.Checked = false;
+            chkSalario.Checked = false;
+            chkRecibo.Checked = false;
+        }
+        private void InicializarGrilla()
+        {
+            dgvTareas.AutoGenerateColumns = false;
+            dgvTareas.Columns.Clear();
+
+            dgvTareas.Columns.Add("Comentario", "Comentario");
+            dgvTareas.Columns["Comentario"].DataPropertyName = "Comentario";
+
+            dgvTareas.Columns.Add("Fecha", "Fecha");
+            dgvTareas.Columns["Fecha"].DataPropertyName = "Fecha";
+
+            dgvTareas.Columns.Add("NombreTipoTarea", "Tipo de Tarea"); 
+            dgvTareas.Columns["NombreTipoTarea"].DataPropertyName = "NombreTipoTarea";
+
+            dgvTareas.Columns.Add("NombreLugar", "Lugar");
+            dgvTareas.Columns["NombreLugar"].DataPropertyName = "NombreLugar";
+
+            // Columnas checkbox
+            dgvTareas.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                HeaderText = "Insumo",
+                DataPropertyName = "Insumo",
+                Name = "Insumo"
+            });
+
+            dgvTareas.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                HeaderText = "Estudio",
+                DataPropertyName = "Estudio",
+                Name = "Estudio"
+            });
+
+            dgvTareas.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                HeaderText = "Vacación",
+                DataPropertyName = "Vacacion",
+                Name = "Vacacion"
+            });
+
+            dgvTareas.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                HeaderText = "Reclamo Salario",
+                DataPropertyName = "ReclamoSalario",
+                Name = "ReclamoSalario"
+            });
+
+            dgvTareas.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                HeaderText = "Reclamo Recibo",
+                DataPropertyName = "ReclamoRecibo",
+                Name = "ReclamoRecibo"
+            });
+
+           
+            dgvTareas.DataSource = listaTareas;
+        }
+
+        private void btnAgregarLugares_Click(object sender, EventArgs e)
+        {
+            string nuevoLugar = txtLugares.Text.Trim();
+
+            if (!string.IsNullOrEmpty(nuevoLugar))
+            {
+                conexion.Agregar_Lugar(nuevoLugar);
+
+                MessageBox.Show("Lugar agregado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtLugares.Clear();
+
+            
+                conexion.CargarLugares(cmbLugaress);
+            }
+            else
+            {
+                MessageBox.Show("Debe ingresar un nombre para el lugar.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            txtLugares.Focus();
+        }
+
+        private void btnAgregarTareas_Click(object sender, EventArgs e)
+        {
+            string nuevaTarea = txtTareas.Text.Trim();
+
+            if (!string.IsNullOrEmpty(nuevaTarea))
+            {
+                // Crear una instancia de clsTarea solo para pasar el nombre
+                clsTarea tarea = new clsTarea();
+                tarea.Comentario = nuevaTarea;
+
+                conexion.Agregar_TipoTarea(tarea);
+
+                MessageBox.Show("Tarea agregada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtTareas.Clear();
+
+                conexion.CargarTiposTarea(cmbTipoTarea);
+            }
+            else
+            {
+                MessageBox.Show("Debe ingresar un nombre para la tarea.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            txtTareas.Focus();
+
+        }
+
+        private void btnCancelar_Click(object sender, EventArgs e)
+        {
+            // Limpiar campos de texto
+            txtLugares.Clear();
+            txtTareas.Clear();
+            txtMensajeria.Clear();
+
+            // Resetear comboBox
+            cmbLugaress.SelectedIndex = -1;
+            cmbTipoTarea.SelectedIndex = -1;
+
+            // Resetear fecha al día actual
+            dateTimePicker1.Value = DateTime.Now;
+
+            // Desmarcar todos los CheckBoxes
+            chkInsumos.Checked = false;
+            chkEstudio.Checked = false;
+            chkVacacion.Checked = false;
+            chkSalario.Checked = false;
+            chkRecibo.Checked = false;
+
+       
+        }
+
+        private void btnGuardar_Click_2(object sender, EventArgs e)
+        {
+       
+        }
+    
     }
 }

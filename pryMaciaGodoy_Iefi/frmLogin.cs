@@ -15,17 +15,23 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmLogin : MaterialForm
     {
+        public static string UsuarioActual;
+        public static DateTime HoraInicioSesion;
+
         public frmLogin()
         {
             InitializeComponent();
             var skinManager = MaterialSkinManager.Instance;
             skinManager.AddFormToManage(this);
-            skinManager.Theme = MaterialSkinManager.Themes.DARK; // O LIGHT
+            skinManager.Theme = MaterialSkinManager.Themes.DARK;
 
+           
             skinManager.ColorScheme = new ColorScheme(
-                Primary.BlueGrey800, Primary.BlueGrey900,
-                Primary.BlueGrey500, Accent.LightBlue200,
-                TextShade.WHITE);
+                Primary.DeepPurple700,   // color principal de fondo 
+                Primary.DeepPurple900,   // fondo del formulario
+                Primary.DeepPurple500,   // color del título/cabecera
+                Accent.Indigo200,        // color de acento 
+                TextShade.WHITE);        // color del texto 
             txtContraseña.Password = true;
             chkMostrar.Checked = false;
             txtUsuario.Font = new Font("Georgia", 12, FontStyle.Regular);
@@ -70,6 +76,10 @@ namespace pryMaciaGodoy_Iefi
                     if (reader.Read())
                     {
                         int rolId = Convert.ToInt32(reader["RolId"]);
+
+                        UsuarioActual = username;
+                        HoraInicioSesion = DateTime.Now; // Hora en que se inició la sesión
+
                         MessageBox.Show("Inicio de sesión exitoso. RolId: " + rolId);
 
                         frmPrincipal ventana = new frmPrincipal(username, rolId);
