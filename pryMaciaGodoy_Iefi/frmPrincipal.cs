@@ -14,6 +14,9 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmPrincipal : MaterialForm
     {
+        // ---------------------------------------------------------------------------
+        #region VARIABLES GLOBALES
+        // ---------------------------------------------------------------------------
         private string nombreUsuario;
         private int usuarioRol;
 
@@ -24,16 +27,25 @@ namespace pryMaciaGodoy_Iefi
         private int segundosContador = 0;
 
         private readonly clsBD conexion = new clsBD();
-        public frmPrincipal(String nombre, int rol)
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region CONSTRUCTOR
+        // ---------------------------------------------------------------------------
+        public frmPrincipal(string nombre, int rol)
         {
             InitializeComponent();
             nombreUsuario = nombre;
             usuarioRol = rol;
         }
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region EVENTO LOAD DEL FORMULARIO
+        // ---------------------------------------------------------------------------
         public void frmPrincipal_Load(object sender, EventArgs e)
         {
-            // Iniciar tiempo
+            // Iniciar temporizador
             Tiempo.Interval = 1000;
             Tiempo.Start();
 
@@ -45,13 +57,18 @@ namespace pryMaciaGodoy_Iefi
 
             ConfigurarAccesoPorRol();
         }
-        private void ConfigurarAccesoPorRol()
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region CONFIGURAR ACCESO POR ROL
+        // ---------------------------------------------------------------------------
+        public void ConfigurarAccesoPorRol()
         {
             menuInicio.Visible = true;
 
             if (usuarioRol == 1) // Administrador
             {
-                menuTareas.Visible = false;
+                menuTareas.Visible = true;
                 menuAdministracion.Visible = true;
             }
             else // Usuario común
@@ -60,28 +77,22 @@ namespace pryMaciaGodoy_Iefi
                 menuAdministracion.Visible = false;
             }
         }
+        #endregion
 
-
-
-        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
+        // ---------------------------------------------------------------------------
+        #region CIERRE DE SESIÓN
+        // ---------------------------------------------------------------------------
         private void salirToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var confirmar = MessageBox.Show("¿Deseás cerrar sesión?", "Confirmar salida", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (confirmar == DialogResult.Yes)
             {
-                // Detener cualquier temporizador si aplica
                 Tiempo.Stop();
+                horaFinSesion = DateTime.Now;
 
-                // Obtener hora fin
-                DateTime horaFinSesion = DateTime.Now;
+                int idUsuario = conexion.ObtenerIdUsuarioPorNombre(nombreUsuario);
 
-                // Armar el objeto sesión
-                int idUsuario = conexion.ObtenerIdUsuarioPorNombre(nombreUsuario); // Método que ya tenés
                 clsSesion sesion = new clsSesion
                 {
                     IdUsuario = idUsuario,
@@ -90,60 +101,44 @@ namespace pryMaciaGodoy_Iefi
                     HoraFin = horaFinSesion
                 };
 
-                // Guardar la sesión
                 conexion.GuardarSesion(sesion);
 
-                // Volver al login
                 this.Hide();
                 new frmLogin().Show();
             }
         }
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region TEMPORIZADOR
+        // ---------------------------------------------------------------------------
         private void timerTiempo_Tick(object sender, EventArgs e)
         {
             segundosContador++;
             TimeSpan tiempoTranscurrido = TimeSpan.FromSeconds(segundosContador);
             LblTiempo.Text = tiempoTranscurrido.ToString(@"hh\:mm\:ss");
         }
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region CIERRE COMPLETO DEL FORMULARIO
+        // ---------------------------------------------------------------------------
         private void frmPrincipal_FormClosed(object sender, FormClosedEventArgs e)
         {
             Tiempo.Stop();
-
             horaFinSesion = DateTime.Now;
+
             TimeSpan duracion = horaFinSesion - horaInicioSesion;
-
             int idUsuario = conexion.ObtenerIdUsuarioPorNombre(nombreUsuario);
+
             clsSesion nuevaSesion = new clsSesion(0, idUsuario, fechaInicioSesion, horaInicioSesion, horaFinSesion, duracion);
-
             conexion.GuardarSesion(nuevaSesion);
+
             Application.Exit();
-        }
-
-        private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            frmUsuarios Gestion = new frmUsuarios();
-            Gestion.ShowDialog();
-        }
-
-        private void auditoriaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            frmAuditoria auditoria = new frmAuditoria();
-            auditoria.ShowDialog();
-        }
-
-        public void registrarTareasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            frmRegistrarTarea frm = new frmRegistrarTarea(usuarioRol);
-
-            frm.Show();
-
         }
 
         private void frmPrincipal_FormClosing(object sender, FormClosingEventArgs e)
         {
-            clsBD conexion = new clsBD();
-
             int idUsuario = conexion.ObtenerIdUsuarioPorNombre(frmLogin.UsuarioActual);
 
             clsSesion sesion = new clsSesion
@@ -156,11 +151,42 @@ namespace pryMaciaGodoy_Iefi
 
             conexion.GuardarSesion(sesion);
         }
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region EVENTOS DE MENÚ
+        // ---------------------------------------------------------------------------
+        private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmUsuarios gestion = new frmUsuarios();
+            gestion.ShowDialog();
+        }
+
+        private void auditoriaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmAuditoria auditoria = new frmAuditoria();
+            auditoria.ShowDialog();
+        }
+
+        public void registrarTareasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmRegistrarTarea frm = new frmRegistrarTarea(usuarioRol);
+            frm.Show();
+        }
 
         private void listarTareasToolStripMenuItem_Click(object sender, EventArgs e)
         {
             frmListarTareas listar = new frmListarTareas();
             listar.ShowDialog();
         }
+        #endregion
+
+ 
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            
+        }
+       
+       
     }
 }

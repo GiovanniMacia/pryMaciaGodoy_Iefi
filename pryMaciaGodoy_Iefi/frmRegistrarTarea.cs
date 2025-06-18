@@ -15,11 +15,18 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmRegistrarTarea : MaterialForm
     {
+        // ---------------------------------------------------------------------------
+        #region 🧾 VARIABLES Y CAMPOS
+        // ---------------------------------------------------------------------------
         private BindingList<clsTarea> listaTareas = new BindingList<clsTarea>();
-
         private string cadenaConexion = "Server=localhost\\SQLEXPRESS;Database=LabIefi;Trusted_Connection=True;";
         private int usuarioId;
         clsBD conexion = new clsBD();
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region 🚪 CONSTRUCTOR Y LOAD
+        // ---------------------------------------------------------------------------
         public frmRegistrarTarea(int usuarioId)
         {
             InitializeComponent();
@@ -28,92 +35,70 @@ namespace pryMaciaGodoy_Iefi
 
         public void frmRegistrarTarea_Load(object sender, EventArgs e)
         {
-
             InicializarGrilla();
             conexion.CargarTiposTarea(cmbTipoTarea);
             conexion.CargarLugares(cmbLugaress);
+            ConfigurarAccesoPorRol();
         }
-        private void CargarTiposTarea()
-        {
-            using (SqlConnection cn = new SqlConnection(cadenaConexion))
-            {
-                cn.Open();
-                string query = "SELECT Id, Nombre FROM TiposTarea";
-                SqlDataAdapter da = new SqlDataAdapter(query, cn);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+        #endregion
 
-                cmbTipoTarea.DataSource = dt;
-                cmbTipoTarea.DisplayMember = "Nombre";
-                cmbTipoTarea.ValueMember = "Id";
-                cmbTipoTarea.SelectedIndex = -1;
+        // ---------------------------------------------------------------------------
+        #region 🔒 CONTROL DE ACCESO
+        // ---------------------------------------------------------------------------
+        private void ConfigurarAccesoPorRol()
+        {
+            if (usuarioId != 1)
+            {
+                btnAgregar.Enabled = false;
+                btnModificar.Enabled = false;
+                btnEliminar.Enabled = false;
+                btnAgregarLugares.Enabled = false;
+                btnModificarLugares.Enabled = false;
+                btnEliminarLugares.Enabled = false;
             }
         }
+        #endregion
 
-        private void CargarLugares()
-        {
-            using (SqlConnection cn = new SqlConnection(cadenaConexion))
-            {
-                cn.Open();
-                string query = "SELECT Id, Nombre FROM Lugares";
-                SqlDataAdapter da = new SqlDataAdapter(query, cn);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                cmbLugaress.DataSource = dt;
-                cmbLugaress.DisplayMember = "Nombre";
-                cmbLugaress.ValueMember = "Id";
-                cmbLugaress.SelectedIndex = -1;
-            }
-        }
-
-        private void btnGuardar_Click(object sender, EventArgs e)
-        {
-            clsTarea nuevaTarea = CrearTareaDesdeFormulario();
-
-            clsBD conexion = new clsBD();
-            conexion.GuardarTarea(nuevaTarea);
-
-            MessageBox.Show("Tarea registrada correctamente.");
-            LimpiarFormulario();
-        }
+        // ---------------------------------------------------------------------------
+        #region 📋 CREAR Y LIMPIAR FORMULARIO
+        // ---------------------------------------------------------------------------
         private clsTarea CrearTareaDesdeFormulario()
         {
             return new clsTarea
             {
-                IdUsuario = usuarioId, 
+                IdUsuario = usuarioId,
                 IdTipoTarea = Convert.ToInt32(cmbTipoTarea.SelectedValue),
-                Fecha = dateTimePicker1.Value.Date,
+                Fecha = dateTime.Value.Date,
                 IdLugar = cmbLugaress.SelectedIndex != -1 ? (int?)cmbLugaress.SelectedValue : null,
-                Comentario = "", 
-              
+                Comentario = "",
                 Insumo = chkInsumos.Checked,
-              
                 Estudio = chkEstudio.Checked,
                 Vacacion = chkVacacion.Checked,
-                
-                ReclamoSalario = false, 
+                ReclamoSalario = false,
                 ReclamoRecibo = false
             };
         }
+
         private void LimpiarFormulario()
         {
             cmbTipoTarea.SelectedIndex = -1;
             cmbLugaress.SelectedIndex = -1;
-            dateTimePicker1.Value = DateTime.Today;
+            dateTime.Value = DateTime.Today;
 
-           
             chkInsumos.Checked = false;
-           
             chkEstudio.Checked = false;
             chkVacacion.Checked = false;
+            chkSalario.Checked = false;
+            chkRecibo.Checked = false;
+            txtMensajeria.Clear();
+            txtLugares.Clear();
+            txtTareas.Clear();
         }
+        #endregion
 
-        private void btnGuardar_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
+        // ---------------------------------------------------------------------------
+        #region 💾 GUARDAR Y AGREGAR TAREAS
+        // ---------------------------------------------------------------------------
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             if (cmbLugaress.SelectedIndex == -1 || cmbTipoTarea.SelectedIndex == -1)
@@ -121,15 +106,15 @@ namespace pryMaciaGodoy_Iefi
                 MessageBox.Show("Debe seleccionar un lugar y un tipo de tarea.");
                 return;
             }
+
             clsTarea nueva = new clsTarea
             {
+                IdUsuario = usuarioId,
                 IdTipoTarea = Convert.ToInt32(cmbTipoTarea.SelectedValue),
-                NombreTipoTarea = cmbTipoTarea.Text, // << NUEVO
-
+                NombreTipoTarea = cmbTipoTarea.Text,
                 IdLugar = cmbLugaress.SelectedIndex != -1 ? (int?)cmbLugaress.SelectedValue : null,
-                NombreLugar = cmbLugaress.Text, // << NUEVO
-
-                Fecha = dateTimePicker1.Value,
+                NombreLugar = cmbLugaress.Text,
+                Fecha = dateTime.Value,
                 Comentario = txtMensajeria.Text.Trim(),
                 Insumo = chkInsumos.Checked,
                 Vacacion = chkVacacion.Checked,
@@ -138,21 +123,16 @@ namespace pryMaciaGodoy_Iefi
                 ReclamoRecibo = chkRecibo.Checked
             };
 
-            listaTareas.Add(nueva); // <<--- ¡Este es el cambio!
-
-            // Mostrar mensaje
-            MessageBox.Show("Tarea agregada a la lista correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Limpiar controles
-            cmbLugaress.SelectedIndex = -1;
-            cmbTipoTarea.SelectedIndex = -1;
-            txtMensajeria.Clear();
-            chkInsumos.Checked = false;
-            chkVacacion.Checked = false;
-            chkEstudio.Checked = false;
-            chkSalario.Checked = false;
-            chkRecibo.Checked = false;
+            conexion.GuardarTarea(nueva);
+            listaTareas.Add(nueva);
+            MessageBox.Show("Tarea agregada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            LimpiarFormulario();
         }
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region 🗂️ GRILLA
+        // ---------------------------------------------------------------------------
         private void InicializarGrilla()
         {
             dgvTareas.AutoGenerateColumns = false;
@@ -164,13 +144,12 @@ namespace pryMaciaGodoy_Iefi
             dgvTareas.Columns.Add("Fecha", "Fecha");
             dgvTareas.Columns["Fecha"].DataPropertyName = "Fecha";
 
-            dgvTareas.Columns.Add("NombreTipoTarea", "Tipo de Tarea"); 
+            dgvTareas.Columns.Add("NombreTipoTarea", "Tipo de Tarea");
             dgvTareas.Columns["NombreTipoTarea"].DataPropertyName = "NombreTipoTarea";
 
             dgvTareas.Columns.Add("NombreLugar", "Lugar");
             dgvTareas.Columns["NombreLugar"].DataPropertyName = "NombreLugar";
 
-            // Columnas checkbox
             dgvTareas.Columns.Add(new DataGridViewCheckBoxColumn()
             {
                 HeaderText = "Insumo",
@@ -206,10 +185,13 @@ namespace pryMaciaGodoy_Iefi
                 Name = "ReclamoRecibo"
             });
 
-           
             dgvTareas.DataSource = listaTareas;
         }
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region 🏷️ CRUD TAREAS Y LUGARES
+        // ---------------------------------------------------------------------------
         private void btnAgregarLugares_Click(object sender, EventArgs e)
         {
             string nuevoLugar = txtLugares.Text.Trim();
@@ -217,11 +199,8 @@ namespace pryMaciaGodoy_Iefi
             if (!string.IsNullOrEmpty(nuevoLugar))
             {
                 conexion.Agregar_Lugar(nuevoLugar);
-
-                MessageBox.Show("Lugar agregado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Lugar agregado correctamente.", "Éxito");
                 txtLugares.Clear();
-
-            
                 conexion.CargarLugares(cmbLugaress);
             }
             else
@@ -238,15 +217,12 @@ namespace pryMaciaGodoy_Iefi
 
             if (!string.IsNullOrEmpty(nuevaTarea))
             {
-                // Crear una instancia de clsTarea solo para pasar el nombre
                 clsTarea tarea = new clsTarea();
                 tarea.Comentario = nuevaTarea;
 
                 conexion.Agregar_TipoTarea(tarea);
-
-                MessageBox.Show("Tarea agregada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Tarea agregada correctamente.", "Éxito");
                 txtTareas.Clear();
-
                 conexion.CargarTiposTarea(cmbTipoTarea);
             }
             else
@@ -255,37 +231,95 @@ namespace pryMaciaGodoy_Iefi
             }
 
             txtTareas.Focus();
+        }
 
+        public void btnModificar_Click(object sender, EventArgs e)
+        {
+            if (cmbTipoTarea.SelectedIndex != -1 && !string.IsNullOrWhiteSpace(txtTareas.Text))
+            {
+                int id = Convert.ToInt32(cmbTipoTarea.SelectedValue);
+                string nuevoNombre = txtTareas.Text.Trim();
+                conexion.Modificar_TipoTarea(id, nuevoNombre);
+
+                MessageBox.Show("Tarea modificada con éxito.");
+                conexion.CargarTiposTarea(cmbTipoTarea);
+                txtTareas.Clear();
+            }
+        }
+
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+            if (cmbTipoTarea.SelectedIndex != -1)
+            {
+                int id = Convert.ToInt32(cmbTipoTarea.SelectedValue);
+
+                if (conexion.TipoTareaEnUso(id))
+                {
+                    MessageBox.Show("No se puede eliminar esta tarea porque ya fue utilizada.", "Advertencia");
+                    return;
+                }
+
+                conexion.Eliminar_TipoTarea(id);
+                MessageBox.Show("Tarea eliminada correctamente.");
+                conexion.CargarTiposTarea(cmbTipoTarea);
+                txtTareas.Clear();
+            }
+        }
+
+        private void btnModificarLugares_Click(object sender, EventArgs e)
+        {
+            if (cmbLugaress.SelectedIndex != -1 && !string.IsNullOrWhiteSpace(txtLugares.Text))
+            {
+                int id = Convert.ToInt32(cmbLugaress.SelectedValue);
+                string nuevoNombre = txtLugares.Text.Trim();
+                conexion.Modificar_Lugar(id, nuevoNombre);
+
+                MessageBox.Show("Lugar modificado con éxito.");
+                conexion.CargarLugares(cmbLugaress);
+                txtLugares.Clear();
+            }
+        }
+
+        private void btnEliminarLugares_Click(object sender, EventArgs e)
+        {
+            if (cmbLugaress.SelectedIndex != -1)
+            {
+                int id = Convert.ToInt32(cmbLugaress.SelectedValue);
+
+                if (conexion.LugarEnUso(id))
+                {
+                    MessageBox.Show("No se puede eliminar este lugar porque ya está vinculado a tareas.", "Advertencia");
+                    return;
+                }
+
+                conexion.Eliminar_Lugar(id);
+                MessageBox.Show("Lugar eliminado correctamente.");
+                conexion.CargarLugares(cmbLugaress);
+                txtLugares.Clear();
+            }
+        }
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region 🔄 EVENTOS DE CONTROLES
+        // ---------------------------------------------------------------------------
+        private void cmbTipoTarea_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbTipoTarea.SelectedIndex != -1)
+                txtTareas.Text = cmbTipoTarea.Text;
+        }
+
+        private void cmbLugaress_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbLugaress.SelectedIndex != -1)
+                txtLugares.Text = cmbLugaress.Text;
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
-            // Limpiar campos de texto
-            txtLugares.Clear();
-            txtTareas.Clear();
-            txtMensajeria.Clear();
-
-            // Resetear comboBox
-            cmbLugaress.SelectedIndex = -1;
-            cmbTipoTarea.SelectedIndex = -1;
-
-            // Resetear fecha al día actual
-            dateTimePicker1.Value = DateTime.Now;
-
-            // Desmarcar todos los CheckBoxes
-            chkInsumos.Checked = false;
-            chkEstudio.Checked = false;
-            chkVacacion.Checked = false;
-            chkSalario.Checked = false;
-            chkRecibo.Checked = false;
-
-       
+            LimpiarFormulario();
         }
-
-        private void btnGuardar_Click_2(object sender, EventArgs e)
-        {
-       
-        }
-    
+        #endregion
+        
     }
 }

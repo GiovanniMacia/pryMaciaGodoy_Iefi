@@ -13,6 +13,8 @@ namespace pryMaciaGodoy_Iefi
     {
         public string cadenaConexion = "Server=localhost\\SQLEXPRESS;Database=LabIefi ;Trusted_Connection=True;";
 
+
+        #region Conexión y Utilidades
         private SqlConnection AbrirConexion()
         {
             var conexion = new SqlConnection(cadenaConexion);
@@ -20,12 +22,19 @@ namespace pryMaciaGodoy_Iefi
             return conexion;
         }
 
+        private void MostrarError(string contexto, Exception ex)
+        {
+            MessageBox.Show($"Ocurrió un error al {contexto}.\n\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        #endregion
+
+        #region Gestión de Usuarios
         public void ObtenerUsuarios(DataGridView grilla)
         {
             const string sql = @"
-                SELECT u.Id, u.Nombre, u.Contraseña, u.Correo, r.Nombre AS Rol 
-                FROM Usuarios u 
-                INNER JOIN Roles r ON u.RolId = r.Id";
+        SELECT u.Id, u.Nombre, u.Contraseña, u.Correo, r.Nombre AS Rol 
+        FROM Usuarios u 
+        INNER JOIN Roles r ON u.RolId = r.Id";
 
             try
             {
@@ -47,8 +56,8 @@ namespace pryMaciaGodoy_Iefi
         public void RegistrarUsuario(clsUsuario usuario)
         {
             const string sql = @"
-                INSERT INTO Usuarios (Nombre, Contraseña, Correo, RolId) 
-                VALUES (@Nombre, @Contraseña, @Correo, @Rol)";
+        INSERT INTO Usuarios (Nombre, Contraseña, Correo, RolId) 
+        VALUES (@Nombre, @Contraseña, @Correo, @Rol)";
 
             try
             {
@@ -59,8 +68,6 @@ namespace pryMaciaGodoy_Iefi
                     cmd.Parameters.Add("@Contraseña", SqlDbType.NVarChar).Value = usuario.Contraseña;
                     cmd.Parameters.Add("@Correo", SqlDbType.NVarChar).Value = usuario.Correo;
                     cmd.Parameters.Add("@Rol", SqlDbType.Int).Value = usuario.RolId;
-
-
                     cmd.ExecuteNonQuery();
                     MessageBox.Show("Usuario registrado exitosamente.", "Éxito");
                 }
@@ -88,7 +95,6 @@ namespace pryMaciaGodoy_Iefi
                     cmd.Parameters.Add("@Correo", SqlDbType.NVarChar).Value = usuario.Correo;
                     cmd.Parameters.Add("@RolId", SqlDbType.Int).Value = usuario.RolId;
                     cmd.Parameters.Add("@Id", SqlDbType.Int).Value = usuario.Id;
-
                     cmd.ExecuteNonQuery();
                     MessageBox.Show("Usuario actualizado correctamente.", "Actualización");
                 }
@@ -180,10 +186,6 @@ namespace pryMaciaGodoy_Iefi
             }
         }
 
-        private void MostrarError(string contexto, Exception ex)
-        {
-            MessageBox.Show($"Ocurrió un error al {contexto}.\n\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
         public int ObtenerIdUsuarioPorNombre(string nombreUsuario)
         {
             int id = 0;
@@ -209,12 +211,14 @@ namespace pryMaciaGodoy_Iefi
             }
             return id;
         }
+        #endregion
 
+        #region Gestión de Sesiones
         public void GuardarSesion(clsSesion sesion)
         {
             const string sql = @"
-                INSERT INTO Sesiones (IdUsuario, FechaInicio, HoraInicio, HoraFin) 
-                VALUES (@IdUsuario, @FechaInicio, @HoraInicio, @HoraFin)";
+        INSERT INTO Sesiones (IdUsuario, FechaInicio, HoraInicio, HoraFin) 
+        VALUES (@IdUsuario, @FechaInicio, @HoraInicio, @HoraFin)";
 
             try
             {
@@ -234,6 +238,7 @@ namespace pryMaciaGodoy_Iefi
                 MostrarError("guardar sesión", ex);
             }
         }
+
         public void ListarSesiones(DataGridView Grilla)
         {
             try
@@ -241,9 +246,9 @@ namespace pryMaciaGodoy_Iefi
                 using (SqlConnection conexion = new SqlConnection(cadenaConexion))
                 {
                     conexion.Open();
-
-                    string query = "SELECT u.Nombre, s.FechaInicio, s.HoraInicio, s.HoraFin, s.TiempoTranscurrido FROM Sesiones s INNER JOIN Usuarios u ON s.IdUsuario = u.Id ORDER BY s.FechaInicio DESC, s.HoraInicio DESC;";
-
+                    string query = "SELECT u.Nombre, s.FechaInicio, s.HoraInicio, s.HoraFin, s.TiempoTranscurrido " +
+                                   "FROM Sesiones s INNER JOIN Usuarios u ON s.IdUsuario = u.Id " +
+                                   "ORDER BY s.FechaInicio DESC, s.HoraInicio DESC;";
 
                     SqlCommand comando = new SqlCommand(query, conexion);
                     SqlDataAdapter adaptador = new SqlDataAdapter(comando);
@@ -259,13 +264,16 @@ namespace pryMaciaGodoy_Iefi
                 MessageBox.Show($"No se pudieron cargar las sesiones correctamente. Revise su conexión o intente más tarde. Detalles del error: {error.Message}", "Error de carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        #endregion
+
+        #region Gestión de Tareas
         public void GuardarTarea(clsTarea tarea)
         {
             const string sql = @"
         INSERT INTO Tareas 
         (IdUsuario, IdTipoTarea, Fecha, IdLugar, Comentario, Insumo, Estudio, Vacacion, ReclamoSalario, ReclamoRecibo)
         VALUES 
-        (@usuario, @tipo, @fecha, @lugar, @comentario,@insumo, @estudio, @vacacion, @salario, @recibo)";
+        (@usuario, @tipo, @fecha, @lugar, @comentario, @insumo, @estudio, @vacacion, @salario, @recibo)";
 
             using (SqlConnection cn = new SqlConnection(cadenaConexion))
             using (SqlCommand cmd = new SqlCommand(sql, cn))
@@ -275,16 +283,12 @@ namespace pryMaciaGodoy_Iefi
                 cmd.Parameters.AddWithValue("@fecha", tarea.Fecha);
                 cmd.Parameters.AddWithValue("@lugar", (object)tarea.IdLugar ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@comentario", tarea.Comentario ?? "");
-          
                 cmd.Parameters.AddWithValue("@insumo", tarea.Insumo);
- 
                 cmd.Parameters.AddWithValue("@estudio", tarea.Estudio);
                 cmd.Parameters.AddWithValue("@vacacion", tarea.Vacacion);
                 cmd.Parameters.AddWithValue("@salario", tarea.ReclamoSalario);
                 cmd.Parameters.AddWithValue("@recibo", tarea.ReclamoRecibo);
 
-                cn.Open();
-                cmd.ExecuteNonQuery();
                 try
                 {
                     cn.Open();
@@ -296,6 +300,70 @@ namespace pryMaciaGodoy_Iefi
                 }
             }
         }
+
+        public void Listar_Tareas(DataGridView grilla)
+        {
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                {
+                    conexion.Open();
+                    string query = "SELECT t.Id, t.Fecha, tt.Nombre AS Tarea, l.Nombre AS Lugar, " +
+                                   "t.Insumo, t.Estudio, t.Vacacion, t.ReclamoSalario AS Salario, t.ReclamoRecibo AS Recibo, t.Comentario AS Comentarios " +
+                                   "FROM Tareas t " +
+                                   "INNER JOIN TiposTarea tt ON t.IdTipoTarea = tt.Id " +
+                                   "LEFT JOIN Lugares l ON t.IdLugar = l.Id " +
+                                   "ORDER BY t.Fecha DESC;";
+                    SqlCommand comando = new SqlCommand(query, conexion);
+                    SqlDataAdapter adaptador = new SqlDataAdapter(comando);
+                    DataTable tabla = new DataTable();
+                    adaptador.Fill(tabla);
+                    grilla.DataSource = tabla;
+                }
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show("Error al listar las tareas: " + error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void BuscarporTarea(DataGridView grilla, string texto)
+        {
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                {
+                    conexion.Open();
+                    string query = "SELECT t.Id, t.Fecha, tt.Nombre AS Tarea, l.Nombre AS Lugar, " +
+                                   "t.Insumo, t.Estudio, t.Vacacion, t.ReclamoSalario AS Salario, " +
+                                   "t.ReclamoRecibo AS Recibo, t.Comentario AS Comentarios " +
+                                   "FROM Tareas t " +
+                                   "INNER JOIN TiposTarea tt ON t.IdTipoTarea = tt.Id " +
+                                   "LEFT JOIN Lugares l ON t.IdLugar = l.Id " +
+                                   "WHERE tt.Nombre LIKE @texto " +
+                                   "ORDER BY t.Fecha DESC;";
+                    SqlCommand comando = new SqlCommand(query, conexion);
+                    comando.Parameters.AddWithValue("@texto", "%" + texto + "%");
+
+                    SqlDataAdapter adaptador = new SqlDataAdapter(comando);
+                    DataTable tabla = new DataTable();
+                    adaptador.Fill(tabla);
+                    grilla.DataSource = tabla;
+
+                    if (tabla.Rows.Count == 0 && texto.Length >= 3)
+                    {
+                        MessageBox.Show("No se encontró ninguna tarea con ese nombre.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al buscar tareas: " + ex.Message);
+            }
+        }
+        #endregion
+
+        #region Tipos de Tarea y Lugares
         public void CargarTiposTarea(ComboBox combo)
         {
             using (SqlConnection cn = new SqlConnection(cadenaConexion))
@@ -305,7 +373,6 @@ namespace pryMaciaGodoy_Iefi
                 SqlDataAdapter da = new SqlDataAdapter(query, cn);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-
                 combo.DataSource = dt;
                 combo.DisplayMember = "Nombre";
                 combo.ValueMember = "Id";
@@ -322,25 +389,25 @@ namespace pryMaciaGodoy_Iefi
                 SqlDataAdapter da = new SqlDataAdapter(query, cn);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-
                 combo.DataSource = dt;
                 combo.DisplayMember = "Nombre";
                 combo.ValueMember = "Id";
                 combo.SelectedIndex = -1;
             }
         }
+
         public void Agregar_TipoTarea(clsTarea tarea)
         {
             using (SqlConnection conexion = new SqlConnection(cadenaConexion))
             {
                 string consulta = "INSERT INTO TiposTarea (Nombre) VALUES (@Nombre)";
                 SqlCommand cmd = new SqlCommand(consulta, conexion);
-                cmd.Parameters.AddWithValue("@Nombre", tarea.Comentario); 
-
+                cmd.Parameters.AddWithValue("@Nombre", tarea.Comentario);
                 conexion.Open();
                 cmd.ExecuteNonQuery();
             }
         }
+
         public void Agregar_Lugar(string nombreLugar)
         {
             using (SqlConnection conexion = new SqlConnection(cadenaConexion))
@@ -348,43 +415,87 @@ namespace pryMaciaGodoy_Iefi
                 string consulta = "INSERT INTO Lugares (Nombre) VALUES (@Nombre)";
                 SqlCommand cmd = new SqlCommand(consulta, conexion);
                 cmd.Parameters.AddWithValue("@Nombre", nombreLugar);
-
                 conexion.Open();
                 cmd.ExecuteNonQuery();
             }
         }
 
-        public void ListarTareas(DataGridView grilla)
+        public void Modificar_TipoTarea(int id, string nuevoNombre)
         {
-            try
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
             {
-                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
-                {
-                    conexion.Open();
-
-                    string query = "SELECT t.Id, t.Fecha, tt.Nombre AS TipoTarea, l.Nombre AS Lugar, " +
-                                   "t.Insumo, t.Estudio, t.Vacacion, t.ReclamoSalario, t.ReclamoRecibo, t.Comentario " +
-                                   "FROM Tareas t " +
-                                   "INNER JOIN TiposTarea tt ON t.IdTipoTarea = tt.Id " +
-                                   "LEFT JOIN Lugares l ON t.IdLugar = l.Id " +  // Usamos LEFT JOIN porque el lugar puede ser null
-                                   "ORDER BY t.Fecha DESC;";
-
-                    SqlCommand comando = new SqlCommand(query, conexion);
-                    SqlDataAdapter adaptador = new SqlDataAdapter(comando);
-
-                    DataTable tabla = new DataTable();
-                    adaptador.Fill(tabla);
-                    grilla.DataSource = tabla;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al listar las tareas: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string query = "UPDATE TiposTarea SET Nombre = @Nombre WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, cn);
+                cmd.Parameters.AddWithValue("@Nombre", nuevoNombre);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cn.Open();
+                cmd.ExecuteNonQuery();
             }
         }
 
+        public void Eliminar_TipoTarea(int id)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                string query = "DELETE FROM TiposTarea WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, cn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Modificar_Lugar(int id, string nuevoNombre)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                string query = "UPDATE Lugares SET Nombre = @Nombre WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, cn);
+                cmd.Parameters.AddWithValue("@Nombre", nuevoNombre);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Eliminar_Lugar(int id)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                string query = "DELETE FROM Lugares WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, cn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public bool TipoTareaEnUso(int id)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                string query = "SELECT COUNT(*) FROM Tareas WHERE IdTipoTarea = @Id";
+                SqlCommand cmd = new SqlCommand(query, cn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cn.Open();
+                int cantidad = (int)cmd.ExecuteScalar();
+                return cantidad > 0;
+            }
+        }
+
+        public bool LugarEnUso(int id)
+        {
+            using (SqlConnection cn = new SqlConnection(cadenaConexion))
+            {
+                string query = "SELECT COUNT(*) FROM Tareas WHERE IdLugar = @Id";
+                SqlCommand cmd = new SqlCommand(query, cn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cn.Open();
+                int cantidad = (int)cmd.ExecuteScalar();
+                return cantidad > 0;
+            }
+        }
+        #endregion
+
     }
 }
-
-
-

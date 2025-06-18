@@ -15,88 +15,117 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmLogin : MaterialForm
     {
+        // ---------------------------------------------------------------------------
+        #region VARIABLES GLOBALES
+        // ---------------------------------------------------------------------------
         public static string UsuarioActual;
         public static DateTime HoraInicioSesion;
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region CONSTRUCTOR Y CONFIGURACIÓN DEL FORMULARIO
+        // ---------------------------------------------------------------------------
         public frmLogin()
         {
             InitializeComponent();
+
+            // Configuración de estilo con MaterialSkin
             var skinManager = MaterialSkinManager.Instance;
             skinManager.AddFormToManage(this);
             skinManager.Theme = MaterialSkinManager.Themes.DARK;
 
-           
             skinManager.ColorScheme = new ColorScheme(
-                Primary.DeepPurple700,   // color principal de fondo 
-                Primary.DeepPurple900,   // fondo del formulario
-                Primary.DeepPurple500,   // color del título/cabecera
-                Accent.Indigo200,        // color de acento 
-                TextShade.WHITE);        // color del texto 
+                Primary.DeepPurple700,   // Color principal del contenido
+                Primary.DeepPurple900,   // Fondo del formulario
+                Primary.DeepPurple500,   // Cabecera
+                Accent.Indigo200,        // Color de acento (botones, etc.)
+                TextShade.WHITE);        // Color del texto
+
+            // Configuración inicial de campos
             txtContraseña.Password = true;
             chkMostrar.Checked = false;
+
+            // Fuente personalizada
             txtUsuario.Font = new Font("Georgia", 12, FontStyle.Regular);
             txtContraseña.Font = new Font("Georgia", 12, FontStyle.Regular);
         }
 
         private void frmLogin_Load(object sender, EventArgs e)
         {
-
+            
         }
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region EVENTOS DE CONTROLES
+        // ---------------------------------------------------------------------------
         private void chkMostrar_CheckedChanged(object sender, EventArgs e)
         {
+            // Alternar visibilidad de la contraseña
             txtContraseña.Password = !chkMostrar.Checked;
         }
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region MÉTODOS: SESIONES
+        // ---------------------------------------------------------------------------
         private void btnIngresar_Click(object sender, EventArgs e)
         {
             string username = txtUsuario.Text.Trim();
             string password = txtContraseña.Text;
 
+            // Validar campos vacíos
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Por favor, completá ambos campos.", "Campos vacíos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string connectionString = "Server=localhost\\SQLEXPRESS;Database=LabIefi ;Trusted_Connection=True;";
+            // Datos de conexión y consulta SQL
+            string connectionString = "Server=localhost\\SQLEXPRESS;Database=LabIefi;Trusted_Connection=True;";
             string query = "SELECT RolId FROM Usuarios WHERE Nombre = @usuario AND Contraseña = @Contraseña";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
+                cmd.Parameters.AddWithValue("@usuario", username);
+                cmd.Parameters.AddWithValue("@Contraseña", password);
+
                 try
                 {
                     conn.Open();
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@usuario", username);
-                    cmd.Parameters.AddWithValue("@Contraseña", password);
-
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.Read())
                     {
+                        // Login exitoso
                         int rolId = Convert.ToInt32(reader["RolId"]);
 
                         UsuarioActual = username;
-                        HoraInicioSesion = DateTime.Now; // Hora en que se inició la sesión
+                        HoraInicioSesion = DateTime.Now;
 
                         MessageBox.Show("Inicio de sesión exitoso. RolId: " + rolId);
 
+                        // Abrir formulario principal
                         frmPrincipal ventana = new frmPrincipal(username, rolId);
                         ventana.Show();
                         this.Hide();
                     }
                     else
                     {
-                        MessageBox.Show("Usuario o contraseña incorrectos.");
+                        // Credenciales inválidas
+                        MessageBox.Show("Usuario o contraseña incorrectos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error al conectar con la base de datos: " + ex.Message);
+                    // Error de conexión
+                    MessageBox.Show("Error al conectar con la base de datos:\n" + ex.Message, "Error de conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+        #endregion
     }
 }
+
 

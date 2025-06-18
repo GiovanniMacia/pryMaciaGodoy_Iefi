@@ -426,7 +426,7 @@
             this.Controls.Add(this.txtBuscar);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmUsuarios";
-            this.Text = "     Gestion Usuarios";
+            this.Text = "     Usuarios";
             this.Load += new System.EventHandler(this.frmUsuarios_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

@@ -15,6 +15,7 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmListarTareas : MaterialForm
     {
+        clsBD conexion = new clsBD();
         public frmListarTareas()
         {
             InitializeComponent();
@@ -22,14 +23,26 @@ namespace pryMaciaGodoy_Iefi
 
         private void frmListarTareas_Load(object sender, EventArgs e)
         {
-            clsBD conexion = new clsBD();
-            conexion.ListarTareas(dgvTareas);
+            
+            conexion.Listar_Tareas(dgvTareas);
 
             dgvTareas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             dgvTareas.ReadOnly = true;
             dgvTareas.AllowUserToAddRows = false;
             dgvTareas.AllowUserToDeleteRows = false;
             dgvTareas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        }
+
+        private void txtBuscarTarea_TextChanged(object sender, EventArgs e)
+        {
+            conexion.BuscarporTarea(dgvTareas, txtBuscarTarea.Text);
+        }
+
+        private void btnVerTodos_Click(object sender, EventArgs e)
+        {
+            conexion.Listar_Tareas(dgvTareas);
+
+            txtBuscarTarea.Clear();
         }
     }
 }

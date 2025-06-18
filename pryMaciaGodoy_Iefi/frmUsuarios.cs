@@ -15,10 +15,16 @@ namespace pryMaciaGodoy_Iefi
 {
     public partial class frmUsuarios : MaterialForm
     {
+        // ---------------------------------------------------------------------------
+        #region 🧾 VARIABLES Y CAMPOS
+        // ---------------------------------------------------------------------------
         clsBD conexion = new clsBD();
         int? usuarioSeleccionado = null;
-      
+        #endregion
 
+        // ---------------------------------------------------------------------------
+        #region 🚪 CONSTRUCTOR Y LOAD
+        // ---------------------------------------------------------------------------
         public frmUsuarios()
         {
             InitializeComponent();
@@ -29,41 +35,43 @@ namespace pryMaciaGodoy_Iefi
             CargarRoles();
             conexion.ObtenerUsuarios(dgvGestion);
         }
-        private void CargarRoles()
-        {
-            using (SqlConnection cn = new SqlConnection("Server=localhost\\SQLEXPRESS;Database=LabIefi;Trusted_Connection=True;"))
-            {
-                string query = "SELECT Id, Nombre FROM Roles";
-                SqlDataAdapter da = new SqlDataAdapter(query, cn);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+        #endregion
 
-                cmbRol.DataSource = dt;
-                cmbRol.DisplayMember = "Nombre";
-                cmbRol.ValueMember = "Id";
-                cmbRol.SelectedIndex = -1;
+        // ---------------------------------------------------------------------------
+        #region 🔄 EVENTOS DE CONTROLES
+        // ---------------------------------------------------------------------------
+        private void dgvGestion_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var fila = dgvGestion.Rows[e.RowIndex];
+            usuarioSeleccionado = Convert.ToInt32(fila.Cells["Id"].Value);
+
+            txtUsuario.Text = fila.Cells["Nombre"].Value.ToString();
+            txtCorreo.Text = fila.Cells["Correo"].Value.ToString();
+            string nombreRol = fila.Cells["Rol"].Value.ToString();
+
+            foreach (DataRowView item in cmbRol.Items)
+            {
+                if (item["Nombre"].ToString() == nombreRol)
+                {
+                    cmbRol.SelectedValue = item["Id"];
+                    break;
+                }
             }
         }
 
-        private void btnBuscar_Click(object sender, EventArgs e)
+        private void txtBuscar_TextChanged(object sender, EventArgs e) { }
+
+        private void btnVolver_Click(object sender, EventArgs e)
         {
-            string nombreBuscar = txtBuscar.Text.Trim();
-            if (string.IsNullOrEmpty(nombreBuscar))
-            {
-                MessageBox.Show("Por favor ingresá un nombre para buscar.");
-                return;
-            }
-
-            conexion.BuscarUsuarioPorNombre(dgvGestion, nombreBuscar);
+            this.Close();
         }
+        #endregion
 
-        private void btnRestablecer_Click(object sender, EventArgs e)
-        {
-
-            conexion.ObtenerUsuarios(dgvGestion);
-            txtBuscar.Clear();
-        }
-
+        // ---------------------------------------------------------------------------
+        #region 📦 CRUD USUARIOS
+        // ---------------------------------------------------------------------------
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             if (ValidarCampos())
@@ -123,30 +131,50 @@ namespace pryMaciaGodoy_Iefi
                 usuarioSeleccionado = null;
             }
         }
+        #endregion
 
-        private void dgvGestion_CellClick(object sender, DataGridViewCellEventArgs e)
+        // ---------------------------------------------------------------------------
+        #region 🔍 BUSCAR Y RESTABLECER
+        // ---------------------------------------------------------------------------
+        private void btnBuscar_Click(object sender, EventArgs e)
         {
-            if (e.RowIndex < 0) return;
+            string nombreBuscar = txtBuscar.Text.Trim();
 
-            var fila = dgvGestion.Rows[e.RowIndex];
-            usuarioSeleccionado = Convert.ToInt32(fila.Cells["Id"].Value);
-
-            txtUsuario.Text = fila.Cells["Nombre"].Value.ToString();
-            txtCorreo.Text = fila.Cells["Correo"].Value.ToString();
-            string nombreRol = fila.Cells["Rol"].Value.ToString();
-
-            foreach (DataRowView item in cmbRol.Items)
+            if (string.IsNullOrEmpty(nombreBuscar))
             {
-                if (item["Nombre"].ToString() == nombreRol)
-                {
-                    cmbRol.SelectedValue = item["Id"];
-                    break;
-                }
+                MessageBox.Show("Por favor ingresá un nombre para buscar.");
+                return;
             }
 
-
-
+            conexion.BuscarUsuarioPorNombre(dgvGestion, nombreBuscar);
         }
+
+        private void btnRestablecer_Click(object sender, EventArgs e)
+        {
+            conexion.ObtenerUsuarios(dgvGestion);
+            txtBuscar.Clear();
+        }
+        #endregion
+
+        // ---------------------------------------------------------------------------
+        #region 🧠 LÓGICA AUXILIAR
+        // ---------------------------------------------------------------------------
+        private void CargarRoles()
+        {
+            using (SqlConnection cn = new SqlConnection("Server=localhost\\SQLEXPRESS;Database=LabIefi;Trusted_Connection=True;"))
+            {
+                string query = "SELECT Id, Nombre FROM Roles";
+                SqlDataAdapter da = new SqlDataAdapter(query, cn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cmbRol.DataSource = dt;
+                cmbRol.DisplayMember = "Nombre";
+                cmbRol.ValueMember = "Id";
+                cmbRol.SelectedIndex = -1;
+            }
+        }
+
         private bool ValidarCampos()
         {
             Error.Clear();
@@ -186,17 +214,7 @@ namespace pryMaciaGodoy_Iefi
             cmbRol.SelectedIndex = -1;
             usuarioSeleccionado = null;
         }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnVolver_Click(object sender, EventArgs e)
-        {
-            
-            this.Close();
-
-        }
+        #endregion
+       
     }
 }
