@@ -39,12 +39,12 @@ namespace pryMaciaGodoy_Iefi
             try
             {
                 using (var conn = AbrirConexion())
-                using (var cmd = new SqlCommand(sql, conn))
-                using (var adapter = new SqlDataAdapter(cmd))
+                using (var cmd = new SqlCommand(sql, conn)) //ejecuta la consulta SQL
+                using (var adapter = new SqlDataAdapter(cmd)) //llena el datatable
                 {
                     var tabla = new DataTable();
                     adapter.Fill(tabla);
-                    grilla.DataSource = tabla;
+                    grilla.DataSource = tabla; //carga datos de la tabla en la grilla
                 }
             }
             catch (Exception ex)
@@ -68,7 +68,7 @@ namespace pryMaciaGodoy_Iefi
                     cmd.Parameters.Add("@Contraseña", SqlDbType.NVarChar).Value = usuario.Contraseña;
                     cmd.Parameters.Add("@Correo", SqlDbType.NVarChar).Value = usuario.Correo;
                     cmd.Parameters.Add("@Rol", SqlDbType.Int).Value = usuario.RolId;
-                    cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery(); //ejecuta para insertar el usuario
                     MessageBox.Show("Usuario registrado exitosamente.", "Éxito");
                 }
             }
@@ -166,7 +166,7 @@ namespace pryMaciaGodoy_Iefi
                     cmd.Parameters.Add("@Nombre", SqlDbType.NVarChar).Value = usuario.Nombre;
                     cmd.Parameters.Add("@Clave", SqlDbType.NVarChar).Value = usuario.Contraseña;
 
-                    object resultado = cmd.ExecuteScalar();
+                    object resultado = cmd.ExecuteScalar(); //ejecuta y devuelve un unico valor
                     if (resultado != null)
                     {
                         usuario.RolId = Convert.ToInt32(resultado);
@@ -256,7 +256,7 @@ namespace pryMaciaGodoy_Iefi
                     DataTable tabla = new DataTable();
                     adaptador.Fill(tabla);
 
-                    Grilla.DataSource = tabla;
+                    Grilla.DataSource = tabla; //carga datos de la tabla en grilla
                 }
             }
             catch (Exception error)
@@ -317,8 +317,8 @@ namespace pryMaciaGodoy_Iefi
                     SqlCommand comando = new SqlCommand(query, conexion);
                     SqlDataAdapter adaptador = new SqlDataAdapter(comando);
                     DataTable tabla = new DataTable();
-                    adaptador.Fill(tabla);
-                    grilla.DataSource = tabla;
+                    adaptador.Fill(tabla); //guarda
+                    grilla.DataSource = tabla; //ejecuta
                 }
             }
             catch (Exception error)
@@ -374,8 +374,8 @@ namespace pryMaciaGodoy_Iefi
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 combo.DataSource = dt;
-                combo.DisplayMember = "Nombre";
-                combo.ValueMember = "Id";
+                combo.DisplayMember = "Nombre"; // muestra el nombre en el combo
+                combo.ValueMember = "Id"; // el valor del combo es el Id
                 combo.SelectedIndex = -1;
             }
         }
